@@ -22,14 +22,9 @@ def combine(a, b):
     """Creates and returns a new Huffman node with children a and b, with the "lesser node" on the left
     The new node's frequency value will be the sum of the a and b frequencies
     The new node's char value will be the lesser of the a and b char ASCII values"""
-    if comes_before(a, b):
-        newNode = HuffmanNode(a.char, a.freq + b.freq)
-        newNode.set_left(a)
-        newNode.set_right(b)
-    else:
-        newNode = HuffmanNode(b.char, a.freq + b.freq)
-        newNode.set_left(b)
-        newNode.set_right(a)
+    newNode = HuffmanNode(a.char, a.freq + b.freq)
+    newNode.set_left(a)
+    newNode.set_right(b)
     return newNode
 
 
@@ -54,20 +49,27 @@ def create_huff_tree(char_freq):
     for i in range(0, len(char_freq)):
         if char_freq[i] != 0:
             treeList += [HuffmanNode(i, char_freq[i])]
-    treeList.sort(key=lambda x : x.char)
-    treeList.sort(key=lambda x: x.freq)
+    _sort_tree(treeList)
     return _create_huff_tree(treeList)
 
 def _create_huff_tree(treeList):
-    start = 0
-    while start < len(treeList) - 1:
-        internal = combine(treeList[start], treeList[start + 1])
+    while len(treeList) > 1:
+        internal = combine(treeList[0], treeList[1])
         treeList.append(internal)
         treeList.pop(0)
-        treeList.sort(key=lambda x: x.char)
-        treeList.sort(key=lambda x: x.freq)
-        start += 1
-    return internal
+        treeList.pop(0)
+        _sort_tree(treeList)
+    return treeList.pop(0)
+
+
+def _sort_tree(treeList):
+    for i in range(0, len(treeList) - 1):
+        for j in range(0, len(treeList) - i - 1):
+            if comes_before(treeList[j+1], treeList[j]):
+                temp = treeList[j]
+                treeList[j] = treeList[j + 1]
+                treeList[j + 1] = temp
+    return treeList
 
 
 def create_code(node):
@@ -102,22 +104,41 @@ def huffman_encode(in_file, out_file):
     """Takes inout file name and output file name as parameters
     Uses the Huffman coding process on the text from the input file and writes encoded text to output file
     Take not of special cases - empty file and file with only one unique character"""
-    freq_arr = cnt_freq(in_file)
+    try:
+        freq_arr = cnt_freq(in_file)
+    except:
+        raise FileNotFoundError
+    try:
+        fout = open(out_file, 'w')
+    except:
+        raise FileNotFoundError
     header = create_header(freq_arr)
+    count = 0
+    for i in freq_arr:
+        if i > 0:
+            count += 1
+    if count == 1:
+        fout.write(header)
+        fout.close()
+        return
+    if count == 0:
+        fout.close()
+        return
+
     node = create_huff_tree(freq_arr)
     code_arr = create_code(node)
 
     fin = open(in_file, 'r')
-    fout = open(out_file, 'w')
 
     lines = fin.readlines()
-    fout.write(header + '\n')
 
-    for line in lines:
-        for i in line:
-            ascii_in = ord(i)
-            fout.write(code_arr[ascii_in])
+
+    if count > 1:
+        fout.write(header + '\n')
+        for line in lines:
+            for i in line:
+                ascii_in = ord(i)
+                fout.write(code_arr[ascii_in])
     fin.close()
     fout.close()
 
-huffman_encode("declaration.txt", "declaration_out.txt")

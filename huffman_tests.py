@@ -2,6 +2,7 @@ import unittest
 import filecmp
 import subprocess
 from huffman import *
+from huffman_helper_tests import *
 
 class TestList(unittest.TestCase):
     def test_cnt_freq(self):
@@ -39,6 +40,29 @@ class TestList(unittest.TestCase):
         err = subprocess.call("diff -wb file1_out.txt file1_soln.txt", shell = True)
         self.assertEqual(err, 0)
 
+    def test_3_text(self):
+        huffman_encode("test3.txt", "test3_out.txt")
+        # capture errors by running 'diff' on your encoded file with a *known* solution file
+        err = subprocess.call("diff -wb test3_out.txt test3_soln.txt", shell=True)
+        self.assertEqual(err, 0)
+    def test_4_text(self):
+        huffman_encode("test4.txt", "test4_out.txt")
+        # capture errors by running 'diff' on your encoded file with a *known* solution file
+        err = subprocess.call("diff -wb test4_out.txt test4_soln.txt", shell=True)
+        self.assertEqual(err, 0)
+    def test_5_txt(self):
+        huffman_encode("test5.txt", "test5_out.txt")
+        # capture errors by running 'diff' on your encoded file with a *known* solution file
+        err = subprocess.call("diff -wb test5_out.txt test5_soln.txt", shell=True)
+        self.assertEqual(err, 0)
+    def test_6_txt(self):
+        huffman_encode("test6.txt", "test6_out.txt")
+        # capture errors by running 'diff' on your encoded file with a *known* solution file
+        err = subprocess.call("diff -wb test6_out.txt test6_soln.txt", shell=True)
+        self.assertEqual(err, 0)
+    def testError(self):
+        with self.assertRaises(FileNotFoundError):
+            huffman_encode("testkdkdkd.txt", "test5_out.txt")
 
 if __name__ == '__main__': 
    unittest.main()
